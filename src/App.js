@@ -1,5 +1,6 @@
 import IndexRouter from "./router/indexRouter";
 import './App.css'
+import 'antd/dist/antd.min.css';
 
 function App() {
   return (
