@@ -79,6 +79,9 @@ export default function RightList() {
 
     let a = dataSource.filter((data) => data.id !== item.id);
     setdataSource(a);
+
+    //删除远程数据
+    // axios.delete(`http://localhost:5000/rights/${item.id}`)
   };
 
   return (
