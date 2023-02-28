@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 import { Table, Tag, Button, Modal } from "antd";
 import axios from "axios";
@@ -12,11 +12,11 @@ export default function RightList() {
   useEffect(() => {
     axios.get("http://localhost:5000/rights?_embed=children").then((res) => {
       const list = res.data;
-      list.forEach(item=>{
-        if(item.children.length === 0){
-          item.children = ""
+      list.forEach((item) => {
+        if (item.children.length === 0) {
+          item.children = "";
         }
-      })
+      });
       setdataSource(list);
     });
   }, []);
@@ -77,11 +77,23 @@ export default function RightList() {
     console.log(item);
     //当前页面同步状态 + 后端同步
 
-    let a = dataSource.filter((data) => data.id !== item.id);
-    setdataSource(a);
+    // let a = dataSource.filter((data) => data.id !== item.id);
+    // setdataSource(a);
 
     //删除远程数据
     // axios.delete(`http://localhost:5000/rights/${item.id}`)
+
+    if (item.grade === 1) {
+      setdataSource(dataSource.filter((data) => data.id !== item.id));
+      axios.delete(`http://localhost:5000/rights/${item.id}`);
+    } else {
+      let list = dataSource.filter((data) => data.id == item.rightId);
+
+      list[0].children = list[0].children.filter((data) => data.id !== item.id);
+
+      setdataSource([...dataSource]);
+      axios.delete(`http://localhost:5000/children/${item.id}`);
+    }
   };
 
   return (
