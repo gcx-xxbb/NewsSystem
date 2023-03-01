@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
-import { Table, Tag, Button, Modal } from "antd";
+import { Table, Tag, Button, Modal, Popover, Switch } from "antd";
 import axios from "axios";
 
 const { confirm } = Modal;
@@ -51,7 +51,27 @@ export default function RightList() {
               style={{ marginRight: "5px" }}
               onClick={() => showConfirm(item)}
             />
-            <Button type="primary" shape="circle" icon={<EditOutlined />} />
+            <Popover
+              content={
+                <div style={{ textAlign: "center" }}>
+                  <Switch
+                    checked={item.pagepermisson}
+                    onChange={() => {
+                      switchMethod(item);
+                    }}
+                  ></Switch>
+                </div>
+              }
+              title="页面配置项"
+              trigger={item.pagepermisson == undefined ? "" : "click"}
+            >
+              <Button
+                type="primary"
+                shape="circle"
+                icon={<EditOutlined />}
+                disabled={item.pagepermisson == undefined}
+              />
+            </Popover>
           </div>
         );
       },
@@ -93,6 +113,21 @@ export default function RightList() {
 
       setdataSource([...dataSource]);
       axios.delete(`http://localhost:5000/children/${item.id}`);
+    }
+  };
+
+  const switchMethod = (item) => {
+    item.pagepermisson = item.pagepermisson === 1 ? 0 : 1;
+    setdataSource([...dataSource]);
+
+    if (item.grade === 1) {
+      axios.patch(`http://localhost:5000/rights/${item.id}`, {
+        pagepermisson: item.pagepermisson,
+      });
+    } else {
+      axios.patch(`http://localhost:5000/children/${item.id}`, {
+        pagepermisson: item.pagepermisson,
+      });
     }
   };
 
