@@ -10,17 +10,13 @@ export default function TopHeader() {
     setCollapsed(!collapsed);
   };
 
-  const menu = (
-    <Menu>
-      <Menu.Item>
-        超级管理员
-      </Menu.Item>
-      <Menu.Item type="danger ">退出</Menu.Item>
-    </Menu>
-  );
+  const menu = [{ label: '超级管理员', key: 'item-1' }
+]
+    
 
   return (
     <Header style={{ background: "#fff", padding: "0 16px" }}>
+      <div>
       {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
             className: 'trigger',
             onClick: () => changeCollapsed(),
@@ -31,6 +27,8 @@ export default function TopHeader() {
         <Avatar size="large" icon={<UserOutlined />} />
         </Dropdown>
       </div>
+      </div>
+      
     </Header>
   );
 }
