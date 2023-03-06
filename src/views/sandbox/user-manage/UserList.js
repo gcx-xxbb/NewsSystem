@@ -16,28 +16,6 @@ import axios from "axios";
 
 const { confirm } = Modal;
 
-const layout = {
-  labelCol: {
-    span: 8,
-  },
-  wrapperCol: {
-    span: 16,
-  },
-};
-
-/* eslint-disable no-template-curly-in-string */
-const validateMessages = {
-  required: "${label} is required!",
-  types: {
-    email: "${label} is not a valid email!",
-    number: "${label} is not a valid number!",
-  },
-  number: {
-    range: "${label} must be between ${min} and ${max}",
-  },
-};
-/* eslint-enable no-template-curly-in-string */
-
 const handleChange = (value) => {
   console.log(`selected ${value}`);
 };
@@ -46,9 +24,8 @@ export default function UserList() {
   const [dataSource, setdataSource] = useState([]);
   const [roleList, setRoleList] = useState([]);
   const [regionList, setRegionList] = useState([]);
-  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({});
   const [open, setOpen] = useState(false);
-  const form = Form.useForm();
   //获取初始数据
   useEffect(() => {
     axios.get("http://localhost:5000/users?_expand=role").then((res) => {
@@ -129,6 +106,7 @@ export default function UserList() {
               icon={<EditOutlined />}
               disabled={item.default}
               onClick={() => {
+                editForm(item)
                 console.log("对数据进行操作");
               }}
             />
@@ -162,6 +140,12 @@ export default function UserList() {
     axios.delete(`http://localhost:5000/users/${item.id}`);
   };
 
+  //编辑用户
+  const editForm = (item)=>{
+    setOpen(true)
+    setFormData(item)
+  }
+
   const CollectionCreateForm = ({ open, onCreate, onCancel }) => {
     const [form] = Form.useForm();
     return (
@@ -175,6 +159,7 @@ export default function UserList() {
           form
             .validateFields()
             .then((values) => {
+              console.log(values);
               form.resetFields();
               onCreate(values);
             })
@@ -201,6 +186,7 @@ export default function UserList() {
                 message: "请输入用户名!",
               },
             ]}
+            initialValue={formData.username}
           >
             <Input />
           </Form.Item>
@@ -213,6 +199,7 @@ export default function UserList() {
                 message: "请输入密码!",
               },
             ]}
+            initialValue={formData.password}
           >
             <Input.Password placeholder="请输入密码" />
           </Form.Item>
@@ -220,7 +207,7 @@ export default function UserList() {
             name="region"
             label="地区"
             // rules={[{ required: true }]}
-            // initialValue={"亚洲"}
+            initialValue={formData.region}
           >
             <Select onChange={handleChange} options={regionList} />
           </Form.Item>
@@ -228,7 +215,8 @@ export default function UserList() {
             name="roleId"
             label="角色"
             rules={[{ required: true }]}
-            initialValue={3}
+            // initialValue={3}
+            initialValue={formData.roleId}
           >
             <Select onChange={handleChange} options={roleList} />
           </Form.Item>
@@ -248,15 +236,27 @@ export default function UserList() {
 
   //添加用户相关
   const onCreate = (values) => {
-    console.log("Received values of form: ", values);
+    console.log(values);
     setOpen(false);
     const data = {
       ...values,
       region: values.region || "",
-      default: false,
-      roleState: false,
+      default: formData.default || false,
+      roleState: formData.roleState || false,
     };
-    axios.post("http://localhost:5000/users",data)
+    if(formData.id){
+      axios.patch(`http://localhost:5000/users/${formData.id}`,data).then(
+        res=>{
+          axios.get("http://localhost:5000/users?_expand=role").then((res) => {
+            setdataSource(res.data);
+          });
+        }
+      )
+    }else{
+      axios.post("http://localhost:5000/users",data)
+    }
+    setFormData({})
+   
   };
 
   return (
