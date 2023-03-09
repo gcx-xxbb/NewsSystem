@@ -31,16 +31,19 @@ function SideMenu(props) {
   };
 
   const [menu, setMenu] = useState([]);
+  const {role:{rights}} = JSON.parse(localStorage.getItem("token"))
+
 
   //获取列表数据
   useEffect(() => {
-    axios.get("http://localhost:5000/rights?_embed=children").then((res) => {
+    axios.get("/rights?_embed=children").then((res) => {
       setMenu(res.data);
     });
   }, []);
 
+  //验证登录用户的权限
   const checkPagePermission = (item) => {
-    return item.pagepermisson === 1;
+    return item.pagepermisson && rights.includes(item.key)
   };
 
   const renderMenu = (menuList) => {

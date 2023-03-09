@@ -26,22 +26,31 @@ export default function UserList() {
   const [regionList, setRegionList] = useState([]);
   const [formData, setFormData] = useState({});
   const [open, setOpen] = useState(false);
+  const { roleId ,region} = JSON.parse(localStorage.getItem("token"));
   //获取初始数据
   useEffect(() => {
-    axios.get("http://localhost:5000/users?_expand=role").then((res) => {
+    axios.get("/users?_expand=role").then((res) => {
       console.log(res.data);
-      setdataSource(res.data);
+      const dataList = res.data.filter((item) => {
+       if(roleId !== 1){
+        return item.roleId  >= roleId && item.region === region 
+       }else{
+        return item
+       }
+      });
+      setdataSource(dataList);
       // initData()
     });
   }, []);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/roles").then((res) => {
+    axios.get("/roles").then((res) => {
       const roles = res.data.map((item) => {
         return {
           id: item.id,
           value: item.roleType,
           label: item.roleName,
+          disabled: roleId !== 1 && item.id <= roleId,
         };
       });
       setRoleList(roles);
@@ -49,8 +58,16 @@ export default function UserList() {
   }, []);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/regions").then((res) => {
-      setRegionList(res.data);
+    axios.get("/regions").then((res) => {
+      const regions = res.data.map((item) => {
+        return {
+          title: item.title,
+          value: item.value,
+          id: item.id,
+          disabled: roleId !== 1 && item.value !== region,
+        };
+      });
+      setRegionList(regions);
     });
   }, []);
   //表头
@@ -106,7 +123,7 @@ export default function UserList() {
               icon={<EditOutlined />}
               disabled={item.default}
               onClick={() => {
-                editForm(item)
+                editForm(item);
                 console.log("对数据进行操作");
               }}
             />
@@ -137,21 +154,21 @@ export default function UserList() {
     setdataSource(dataSource.filter((data) => data.id !== item.id));
 
     //删除远程数据
-    axios.delete(`http://localhost:5000/users/${item.id}`);
+    axios.delete(`/users/${item.id}`);
   };
 
   //编辑用户
-  const editForm = (item)=>{
-    setOpen(true)
-    setFormData(item)
-  }
+  const editForm = (item) => {
+    setOpen(true);
+    setFormData(item);
+  };
 
   const CollectionCreateForm = ({ open, onCreate, onCancel }) => {
     const [form] = Form.useForm();
     return (
       <Modal
         open={open}
-        title="添加用户"
+        title={formData.username ? "编辑用户" : "添加用户"}
         okText="确认"
         cancelText="取消"
         onCancel={onCancel}
@@ -188,7 +205,7 @@ export default function UserList() {
             ]}
             initialValue={formData.username}
           >
-            <Input />
+            <Input autoComplete="off" />
           </Form.Item>
           <Form.Item
             name="password"
@@ -201,21 +218,18 @@ export default function UserList() {
             ]}
             initialValue={formData.password}
           >
-            <Input.Password placeholder="请输入密码" />
+            <Input.Password
+              placeholder="请输入密码"
+              autoComplete="new-password"
+            />
           </Form.Item>
-          <Form.Item
-            name="region"
-            label="地区"
-            // rules={[{ required: true }]}
-            initialValue={formData.region}
-          >
+          <Form.Item name="region" label="地区" initialValue={formData.region}>
             <Select onChange={handleChange} options={regionList} />
           </Form.Item>
           <Form.Item
             name="roleId"
             label="角色"
             rules={[{ required: true }]}
-            // initialValue={3}
             initialValue={formData.roleId}
           >
             <Select onChange={handleChange} options={roleList} />
@@ -229,11 +243,10 @@ export default function UserList() {
   const switchMethod = (item) => {
     item.roleState = !item.roleState;
     setdataSource([...dataSource]);
-    axios.patch(`http://localhost:5000/users/${item.id}`, {
+    axios.patch(`/users/${item.id}`, {
       roleState: item.roleState,
     });
   };
-
   //添加用户相关
   const onCreate = (values) => {
     console.log(values);
@@ -242,21 +255,20 @@ export default function UserList() {
       ...values,
       region: values.region || "",
       default: formData.default || false,
-      roleState: formData.roleState || false,
+      roleState: formData.roleState || true,
     };
-    if(formData.id){
-      axios.patch(`http://localhost:5000/users/${formData.id}`,data).then(
-        res=>{
-          axios.get("http://localhost:5000/users?_expand=role").then((res) => {
+    if (formData.id) {
+      axios
+        .patch(`/users/${formData.id}`, data)
+        .then((res) => {
+          axios.get("/users?_expand=role").then((res) => {
             setdataSource(res.data);
           });
-        }
-      )
-    }else{
-      axios.post("http://localhost:5000/users",data)
+        });
+    } else {
+      axios.post("/users", data);
     }
-    setFormData({})
-   
+    setFormData({});
   };
 
   return (
@@ -264,6 +276,7 @@ export default function UserList() {
       <Button
         type="primary"
         onClick={() => {
+          setFormData({});
           setOpen(true);
         }}
       >

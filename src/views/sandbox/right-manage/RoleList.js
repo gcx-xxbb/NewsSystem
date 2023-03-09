@@ -49,7 +49,7 @@ export default function RoleList() {
 
   //初始化
   useEffect(() => {
-    axios.get("http://localhost:5000/roles").then((res) => {
+    axios.get("/roles").then((res) => {
       console.log(res);
       const roleList = res.data;
       setdataSource(roleList);
@@ -57,7 +57,7 @@ export default function RoleList() {
   }, []);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/rights?_embed=children").then((res) => {
+    axios.get("/rights?_embed=children").then((res) => {
       setRightList(res.data);
     });
   }, []);
@@ -87,7 +87,7 @@ export default function RoleList() {
         return item
       })
     );
-    axios.patch(`http://localhost:5000/roles/${currentId}`,{
+    axios.patch(`/roles/${currentId}`,{
       rights:currentRights
     }).then(res=>{
       console.log(res.data);
@@ -123,7 +123,7 @@ export default function RoleList() {
     //当前页面同步状态 + 后端同步
     console.log("confirm");
     setdataSource(dataSource.filter((data) => data.id !== item.id));
-    axios.delete(`http://localhost:5000/roles/${item.id}`);
+    axios.delete(`/roles/${item.id}`);
   };
 
   return (
