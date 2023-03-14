@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import SideMenu from "../../components/sandbox/SideMenu";
 import TopHeader from "../../components/sandbox/TopHeader";
-import nProgress from "nprogress";
+// import NProgress from "nprogress";
 import 'nprogress/nprogress.css'
 
 import "./NewsSandBox.css";
@@ -10,10 +10,6 @@ import NewsRouter from "../../components/sandbox/NewsRouter";
 const { Content } = Layout;
 
 export default function NewsSandBox() {
-  nProgress.start()
-  useEffect(()=>{
-    nProgress.done()
-  },[])
   return (
     <Layout hasSider  >
       <SideMenu />
@@ -25,6 +21,7 @@ export default function NewsSandBox() {
             height: "100%",
             padding: 24,
             minHeight: "calc(100vh - 64px - 48px)",
+            backgroundColor:"#fff"
           }}
         >
           <NewsRouter />

@@ -1,0 +1,16 @@
+.content{
+  margin-top: 35px;
+}
+.news-edit{
+  margin-top: 50px;
+  /* min-height: 30vh; */
+}
+.hidden{
+  display: none;
+}
+.news-set{
+  margin-top: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
